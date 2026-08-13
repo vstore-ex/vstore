@@ -9,7 +9,7 @@ from app.api.auth.authorization import get_current_user
 
 router = APIRouter()
 
-# Include auth routers
+# include auth routers
 router.include_router(registration_router, prefix="/auth/register", tags=["auth"])
 router.include_router(authentication_router, prefix="/auth", tags=["auth"])
 
@@ -17,8 +17,9 @@ router.include_router(authentication_router, prefix="/auth", tags=["auth"])
 async def root():
     return {"message": "welcome to vstore api. hello from pipeline"}
 
-@router.get("/users/me")
-async def get_me(current_user: User = Depends(get_current_user)):
+# user data
+@router.get("/me")
+async def get_me_short(current_user: User = Depends(get_current_user)):
     return {
         "id": current_user.id,
         "username": current_user.username,
