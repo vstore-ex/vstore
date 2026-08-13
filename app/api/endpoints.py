@@ -2,14 +2,29 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.db import get_db
 from app.models.base import User, Role
-from app.schemas import UserCreate, UserLogin, UserOut
-from typing import List
+from app.schemas import UserOut
+from app.api.auth.registration import router as registration_router
+from app.api.auth.authentication import router as authentication_router
+from app.api.auth.authorization import get_current_user
 
 router = APIRouter()
+
+# Include auth routers
+router.include_router(registration_router, prefix="/auth/register", tags=["auth"])
+router.include_router(authentication_router, prefix="/auth", tags=["auth"])
 
 @router.get("/")
 async def root():
     return {"message": "welcome to vstore api. hello from pipeline"}
+
+@router.get("/users/me")
+async def get_me(current_user: User = Depends(get_current_user)):
+    return {
+        "id": current_user.id,
+        "username": current_user.username,
+        "email": current_user.email,
+        "role": current_user.role.name
+    }
 
 # for simple front
 @router.get("/users/public")
@@ -42,69 +57,6 @@ async def get_admin_users(db: Session = Depends(get_db)):
         for u in users
     ]
 
-@router.post("/auth/register", response_model=UserOut)
-async def register(user_in: UserCreate, db: Session = Depends(get_db)):
-    existing_user = db.query(User).filter(
-        (User.username == user_in.username) | (User.email == user_in.email)
-    ).first()
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="username or email already registered"
-        )
-
-    # get user's role
-    role = db.query(Role).filter(Role.name == "User").first()
-
-    # create new user
-    new_user = User(
-        username=user_in.username,
-        email=user_in.email,
-        password=user_in.password,
-        full_name=user_in.full_name,
-        phone=user_in.phone,
-        role_id=role.id
-    )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-
-    # construct UserOut manually to include role_name
-    return UserOut(
-        id=new_user.id,
-        username=new_user.username,
-        email=new_user.email,
-        full_name=new_user.full_name,
-        phone=new_user.phone,
-        role_name=new_user.role.name
-    )
-
-@router.post("/auth/login")
-async def login(credentials: UserLogin, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == credentials.username).first()
-    if not user or user.password != credentials.password:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="invalid username or password"
-        )
-
-    if user.is_banned:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="this account has been banned"
-        )
-
-    return {
-        "message": "login successful",
-        "username": user.username,
-        "role": user.role.name,
-        "permissions": {
-            "can_buy": user.role.can_buy,
-            "can_message": user.role.can_message,
-            "can_ban": user.role.can_ban
-        }
-    }
-
 @router.post("/admin/users/{user_id}/toggle-ban")
 async def toggle_user_ban(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
@@ -120,6 +72,6 @@ async def toggle_user_ban(user_id: int, db: Session = Depends(get_db)):
 
     status_text = "banned" if user.is_banned else "unbanned"
     return {
-        "message": f"user {user.username} has been {status_text}", 
+        "message": f"user {user.username} has been {status_text}",
         "is_banned": user.is_banned
     }
