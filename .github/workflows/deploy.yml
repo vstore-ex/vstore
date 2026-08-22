@@ -5,41 +5,24 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build-and-deploy:
+  build-and-push:
     runs-on: ubuntu-latest
     steps:
-      - name: checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: log in to azure container registry
-        uses: azure/docker-login@v1
-        with:
-          login-server: vstoreacr.azurecr.io
-          username: ${{ secrets.ACR_USERNAME }}
-          password: ${{ secrets.ACR_PASSWORD }}
+      - name: Log in to Azure Container Registry
+        run: echo "${{ secrets.ACR_PASSWORD }}" | docker login vstoreacr.azurecr.io -u ${{ secrets.ACR_USERNAME }} --password-stdin
 
-      - name: build and push docker image
+      - name: Build and push Docker image
         run: |
           docker build -t vstoreacr.azurecr.io/vstore-backend:${{ github.sha }} .
           docker build -t vstoreacr.azurecr.io/vstore-backend:latest .
           docker push vstoreacr.azurecr.io/vstore-backend:${{ github.sha }}
           docker push vstoreacr.azurecr.io/vstore-backend:latest
 
-      - name: deploy to azure container app
+      - name: Deployment Info
         run: |
-          curl -X PATCH \
-            -H "Authorization: Bearer ${{ secrets.AZURE_ACCESS_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "properties": {
-                "template": {
-                  "containers": [
-                    {
-                      "name": "vstore-backend",
-                      "image": "vstoreacr.azurecr.io/vstore-backend:'"${{ github.sha }}"'"
-                    }
-                  ]
-                }
-              }
-            }' \
-            "${{ secrets.AZURE_CONTAINER_APP_URL }}"
+          echo "Image pushed"
+          echo "Now run this command in your terminal to finish deployment:"
+          echo "az containerapp update --name vstore-backend --resource-group vstore-rg --image vstoreacr.azurecr.io/vstore-backend:latest"

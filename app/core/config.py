@@ -12,5 +12,6 @@ class Settings(BaseModel):
     ADMIN_EMAIL: str = os.getenv("ADMIN_EMAIL", "admin@ex.com")
     ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "givemeapasssword")
     SECRET_KEY: str = os.getenv("SECRET_KEY", "super-duper-very-secret-key-lol")
+    AZURE_STORAGE_CONNECTION_STRING: str = os.getenv("AZURE_STORAGE_CONNECTION_STRING", "")
 
 settings = Settings()
