@@ -4,7 +4,7 @@ from app.api.media import router as media_router
 from app.api.search import router as search_router
 from app.admin import setup_admin
 
-from app.models.base import Base, User, Role
+from app.models import Base, User, Role
 from app.core.config import settings
 from app.core.db import engine, SessionLocal
 from fastapi.middleware.cors import CORSMiddleware

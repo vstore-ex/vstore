@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.core.db import get_db
-from app.models.base import User, Role
+from app.models import User, Role
 from app.schemas import UserOut
 from app.api.auth.registration import router as registration_router
 from app.api.auth.authentication import router as authentication_router

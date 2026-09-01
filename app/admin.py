@@ -1,5 +1,5 @@
 from sqladmin import Admin, ModelView
-from app.models.base import Base, User, Role
+from app.models import Base, User, Role
 from app.core.db import engine
 
 def setup_admin(app):
