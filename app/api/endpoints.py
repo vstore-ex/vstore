@@ -40,7 +40,6 @@ async def get_public_users(db: Session = Depends(get_db)):
         for u in users
     ]
 
-
 # for admin-panel
 @router.get("/admin/users")
 async def get_admin_users(db: Session = Depends(get_db)):

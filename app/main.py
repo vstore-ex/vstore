@@ -1,7 +1,9 @@
 from fastapi import FastAPI
 from app.api.endpoints import router as api_router
 from app.api.media import router as media_router
+from app.api.search import router as search_router
 from app.admin import setup_admin
+
 from app.models.base import Base, User, Role
 from app.core.config import settings
 from app.core.db import engine, SessionLocal
@@ -40,6 +42,8 @@ Base.metadata.create_all(bind=engine)
 # api routes
 app.include_router(api_router, prefix="/api/v1")
 app.include_router(media_router, prefix="/api/v1")
+app.include_router(search_router, prefix="/api/v1")
+
 
 # admin setup
 setup_admin(app)
