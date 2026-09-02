@@ -31,7 +31,6 @@ class Game(Base):
     
     price: Mapped[float] = mapped_column(Numeric(10, 2), default=0.00, nullable=False)
     is_free: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
-    download_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     
     developer: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     publisher: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)

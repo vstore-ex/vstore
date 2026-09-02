@@ -18,6 +18,7 @@ class Artwork(Base):
     # optional description (markdown, no images)
     description_md: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
 
     game: Mapped["Game"] = relationship("Game", back_populates="artworks")
     author: Mapped["User"] = relationship("User")

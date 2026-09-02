@@ -1,4 +1,5 @@
 from enum import Enum as PyEnum
+from typing import Optional
 from datetime import datetime
 from sqlalchemy import Integer, Boolean, ForeignKey, Text, Enum, UniqueConstraint, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -20,6 +21,7 @@ class GameReview(Base):
     is_positive: Mapped[bool] = mapped_column(Boolean, nullable=False)
     content_md: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
 
     game: Mapped["Game"] = relationship("Game", back_populates="reviews")
     user: Mapped["User"] = relationship("User")
