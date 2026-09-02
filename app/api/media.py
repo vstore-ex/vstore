@@ -8,7 +8,7 @@ router = APIRouter(prefix="/media", tags=["media"])
 @router.post("/upload")
 async def upload_image(file: UploadFile = File(...)):
     if not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="This file is not an image")
+        raise HTTPException(status_code=400, detail="not an image")
 
     try:
         file_bytes = await file.read()
@@ -18,12 +18,12 @@ async def upload_image(file: UploadFile = File(...)):
 
         return {"url": url, "filename": filename}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"upload failed: {str(e)}")
 
 @router.post("/upload-markdown")
 async def upload_markdown(file: UploadFile = File(...)):
     if not file.filename.endswith(".md"):
-        raise HTTPException(status_code=400, detail="This file is not a markdown file")
+        raise HTTPException(status_code=400, detail="not a markdown file")
 
     try:
         content_bytes = await file.read()
@@ -34,12 +34,11 @@ async def upload_markdown(file: UploadFile = File(...)):
 
         return {"url": url, "filename": filename}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Markdown upload failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"markdown upload failed: {str(e)}")
 
-# for more comfortable test
 @router.post("/test-create-markdown")
 async def test_create_markdown(text: str):
     try:
         return markdown_service.create_markdown_from_text(text)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Test creation failed: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"test creation failed: {str(e)}")

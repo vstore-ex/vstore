@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
+
 from app.core.db import get_db
 from app.models import User
 from app.services.search import search_service
@@ -7,13 +8,14 @@ from app.services.search import search_service
 router = APIRouter(prefix="/search", tags=["search"])
 
 @router.get("/users")
-async def search_users(q: str = Query("", description="Search term"), db: Session = Depends(get_db)):
+async def search_users(q: str = Query("", description="search term"), db: Session = Depends(get_db)):
     users = search_service.search_model(
         db=db,
         model=User,
         search_fields=[User.username, User.full_name, User.email],
         query=q
     )
+
     return [
         {
             "id": u.id,
