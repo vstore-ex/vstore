@@ -11,6 +11,11 @@ class UserCreate(BaseModel):
     full_name: Optional[str] = None
     phone: Optional[str] = None
 
+class UserUpdate(BaseModel):
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[str] = None
+
 class UserLogin(BaseModel):
     username: str
     password: str
@@ -34,6 +39,9 @@ class TokenData(BaseModel):
     username: Optional[str] = None
 
 # genres n tags
+class GenreCreate(BaseModel):
+    name: str
+
 class GenreOut(BaseModel):
     id: int
     name: str
@@ -42,6 +50,9 @@ class GenreOut(BaseModel):
     class Config:
         from_attributes = True
 
+class TagCreate(BaseModel):
+    name: str
+
 class TagOut(BaseModel):
     id: int
     name: str
@@ -49,6 +60,7 @@ class TagOut(BaseModel):
 
     class Config:
         from_attributes = True
+
 
 # game media n banner schemas
 class GameBannerOut(BaseModel):
@@ -146,6 +158,7 @@ class ReviewOut(BaseModel):
 
 # artwork schemas
 class ArtworkCreate(BaseModel):
+    game_id: int
     title: str
     image_url: str
     description_md: Optional[str] = None
@@ -165,6 +178,55 @@ class ArtworkOut(BaseModel):
     description_md: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None
+    username: str
+
+    class Config:
+        from_attributes = True
+
+
+# discussion schemas
+class DiscussionCreate(BaseModel):
+    game_id: int
+    title: str
+    content_md: str
+
+class DiscussionUpdate(BaseModel):
+    title: Optional[str] = None
+    content_md: Optional[str] = None
+
+class DiscussionOut(BaseModel):
+    id: int
+    game_id: int
+    author_id: int
+    thread_id: int
+    title: str
+    content_md: str
+    created_at: datetime
+    username: str
+
+    class Config:
+        from_attributes = True
+
+# comment schemas
+class CommentCreate(BaseModel):
+    content_md: str
+
+class CommentOut(BaseModel):
+    id: int
+    thread_id: int
+    author_id: int
+    content_md: str
+    created_at: datetime
+    username: str
+
+    class Config:
+        from_attributes = True
+
+# thread schemas
+class CommentThreadOut(BaseModel):
+    id: int
+    is_closed: bool
+    created_at: datetime
 
     class Config:
         from_attributes = True

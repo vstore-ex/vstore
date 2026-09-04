@@ -40,7 +40,6 @@ class MarkdownService:
                         text = text.replace(old_tag, new_tag)
                 except Exception as e:
                     continue
-
         return text
 
 

@@ -83,6 +83,7 @@ async def create_game(
 async def update_game(
     game_id: int,
     game_in: GameUpdate,
+
     db: Session = Depends(get_db),
     admin: User = Depends(require_admin)
 ):
@@ -129,5 +130,4 @@ async def delete_game(
 
     db.delete(game)
     db.commit()
-
     return None

@@ -37,7 +37,7 @@ async def login(
         samesite="lax",
     )
 
-    return {"message": "logged in"}
+    return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/logout")
 async def logout(response: Response):
