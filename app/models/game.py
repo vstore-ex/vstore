@@ -4,7 +4,7 @@ from datetime import datetime
 from sqlalchemy import String, Integer, Boolean, ForeignKey, Text, Enum, UniqueConstraint, DateTime, Numeric, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base
-from app.models.taxonomy import game_genres, game_tags
+from app.models.taxonomy import game_tags
 
 class MediaType(str, PyEnum):
     IMAGE = "image"
@@ -29,15 +29,18 @@ class Game(Base):
     title: Mapped[str] = mapped_column(String(150), nullable=False)
     description_md: Mapped[str] = mapped_column(Text, nullable=False)
     
+    original_price: Mapped[float] = mapped_column(Numeric(10, 2), default=0.00, nullable=False)
     price: Mapped[float] = mapped_column(Numeric(10, 2), default=0.00, nullable=False)
     is_free: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     
     developer: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     publisher: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    rating: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
+    requirements: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    meta_info: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
-    genres: Mapped[list["Genre"]] = relationship("Genre", secondary=game_genres, back_populates="games")
     tags: Mapped[list["Tag"]] = relationship("Tag", secondary=game_tags, back_populates="games")
     media: Mapped[list["GameMedia"]] = relationship("GameMedia", back_populates="game", cascade="all, delete-orphan")
     banners: Mapped[list["GameBanner"]] = relationship("GameBanner", back_populates="game", cascade="all, delete-orphan")

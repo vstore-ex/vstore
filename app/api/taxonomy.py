@@ -3,82 +3,14 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
-from app.models.taxonomy import Genre, Tag
-from app.schemas import GenreCreate, GenreOut, TagCreate, TagOut
+from app.models.taxonomy import Tag
+from app.schemas import TagCreate, TagOut
 from app.api.auth.authorization import require_admin
 
 router = APIRouter(prefix="/taxonomy", tags=["taxonomy"])
 
 def generate_slug(text: str) -> str:
     return text.lower().strip().replace(" ", "-")
-
-# genres
-
-@router.get("/genres", response_model=List[GenreOut])
-async def list_genres(db: Session = Depends(get_db)):
-    return db.query(Genre).all()
-
-@router.get("/genres/{genre_id}", response_model=GenreOut)
-async def get_genre(genre_id: int, db: Session = Depends(get_db)):
-    genre = db.query(Genre).filter(Genre.id == genre_id).first()
-    if not genre:
-        raise HTTPException(status_code=404, detail="genre not found")
-    return genre
-
-@router.post("/genres", response_model=GenreOut, status_code=status.HTTP_201_CREATED)
-async def create_genre(
-    genre_in: GenreCreate,
-    db: Session = Depends(get_db),
-    admin=Depends(require_admin)
-):
-    slug = generate_slug(genre_in.name)
-    if db.query(Genre).filter((Genre.name == genre_in.name) | (Genre.slug == slug)).first():
-        raise HTTPException(status_code=400, detail="genre name or slug already exists")
-
-    genre = Genre(name=genre_in.name, slug=slug)
-    db.add(genre)
-    db.commit()
-    db.refresh(genre)
-    return genre
-
-@router.put("/genres/{genre_id}", response_model=GenreOut)
-async def update_genre(
-    genre_id: int,
-    genre_in: GenreCreate,
-    db: Session = Depends(get_db),
-    admin=Depends(require_admin)
-):
-    genre = db.query(Genre).filter(Genre.id == genre_id).first()
-    if not genre:
-        raise HTTPException(status_code=404, detail="genre not found")
-
-    slug = generate_slug(genre_in.name)
-    existing = db.query(Genre).filter(
-        (Genre.name == genre_in.name) | (Genre.slug == slug)
-    ).filter(Genre.id != genre_id).first()
-
-    if existing:
-        raise HTTPException(status_code=400, detail="new genre name or slug already exists")
-
-    genre.name = genre_in.name
-    genre.slug = slug
-    db.commit()
-    db.refresh(genre)
-    return genre
-
-@router.delete("/genres/{genre_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_genre(
-    genre_id: int,
-    db: Session = Depends(get_db),
-    admin=Depends(require_admin)
-):
-    genre = db.query(Genre).filter(Genre.id == genre_id).first()
-    if not genre:
-        raise HTTPException(status_code=404, detail="genre not found")
-
-    db.delete(genre)
-    db.commit()
-    return None
 
 # tags
 

@@ -10,25 +10,20 @@ from app.services.markdown import markdown_service
 
 router = APIRouter(prefix="/games", tags=["games"])
 
-
 # public
 
 @router.get("/", response_model=List[GameListOut])
 async def list_games(
     skip: int = Query(0, ge=0),
     limit: int = Query(20, ge=1, le=100),
-    genre_id: Optional[int] = Query(None),
     tag_id: Optional[int] = Query(None),
     db: Session = Depends(get_db)
 ):
     query = db.query(Game).options(
-        joinedload(Game.genres),
         joinedload(Game.tags),
         joinedload(Game.banners)
     )
 
-    if genre_id:
-        query = query.filter(Game.genres.any(Genre.id == genre_id))
     if tag_id:
         query = query.filter(Game.tags.any(Tag.id == tag_id))
 
@@ -67,8 +62,6 @@ async def create_game(
     
     game = Game(**game_data)
 
-    if game_in.genre_ids:
-        game.genres = db.query(Genre).filter(Genre.id.in_(game_in.genre_ids)).all()
     if game_in.tag_ids:
         game.tags = db.query(Tag).filter(Tag.id.in_(game_in.tag_ids)).all()
 

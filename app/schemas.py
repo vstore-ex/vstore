@@ -38,18 +38,7 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     username: Optional[str] = None
 
-# genres n tags
-class GenreCreate(BaseModel):
-    name: str
-
-class GenreOut(BaseModel):
-    id: int
-    name: str
-    slug: str
-
-    class Config:
-        from_attributes = True
-
+# tags
 class TagCreate(BaseModel):
     name: str
 
@@ -84,33 +73,42 @@ class GameMediaOut(BaseModel):
 class GameCreate(BaseModel):
     title: str
     description_md: str
+    original_price: float = 0.0
     price: float = 0.0
     is_free: bool = True
     developer: Optional[str] = None
     publisher: Optional[str] = None
-    genre_ids: Optional[List[int]] = []
+    rating: Optional[str] = None
+    requirements: Optional[str] = None
+    meta_info: Optional[str] = None
     tag_ids: Optional[List[int]] = []
 
 class GameUpdate(BaseModel):
     title: Optional[str] = None
     description_md: Optional[str] = None
+    original_price: Optional[float] = None
     price: Optional[float] = None
     is_free: Optional[bool] = None
     developer: Optional[str] = None
     publisher: Optional[str] = None
-    genre_ids: Optional[List[int]] = None
+    rating: Optional[str] = None
+    requirements: Optional[str] = None
+    meta_info: Optional[str] = None
     tag_ids: Optional[List[int]] = None
 
 class GameOut(BaseModel):
     id: int
     title: str
     description_md: str
+    original_price: float
     price: float
     is_free: bool
     developer: Optional[str] = None
     publisher: Optional[str] = None
+    rating: Optional[str] = None
+    requirements: Optional[str] = None
+    meta_info: Optional[str] = None
     created_at: datetime
-    genres: List[GenreOut] = []
     tags: List[TagOut] = []
     banners: List[GameBannerOut] = []
     media: List[GameMediaOut] = []
@@ -121,12 +119,12 @@ class GameOut(BaseModel):
 class GameListOut(BaseModel):
     id: int
     title: str
+    original_price: float
     price: float
     is_free: bool
     developer: Optional[str] = None
     publisher: Optional[str] = None
     created_at: datetime
-    genres: List[GenreOut] = []
     tags: List[TagOut] = []
     banners: List[GameBannerOut] = []
 
