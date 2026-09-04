@@ -1,51 +1,47 @@
 import re
 import uuid
-import urllib.request
+import httpx
 from app.services.media import media_service
+
 
 class MarkdownService:
     def __init__(self):
         self.img_pattern = re.compile(r'!\[(.*?)\]\((https?://[^\s)]+)\)')
 
-    def process_and_upload(self, markdown_text: str, filename: str) -> str:
-        def replace_match(match):
-            alt_text = match.group(1)
-            img_url = match.group(2)
+    async def process_content(self, text: str, allow_images: bool = True) -> str:
+        if not text:
+            return ""
 
-            if "blob.core.windows.net" in img_url:
-                return match.group(0)
+        if not allow_images:
+            return self.img_pattern.sub("", text)
 
-            try:
-                req = urllib.request.Request(img_url, headers={"User-Agent": "Mozilla/5.0"})
-                with urllib.request.urlopen(req, timeout=5) as response:
-                    img_bytes = response.read()
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            matches = list(self.img_pattern.finditer(text))
+            for match in matches:
+                alt_text = match.group(1)
+                img_url = match.group(2)
 
-                webp_bytes = media_service.convert_to_webp(img_bytes)
-                new_filename = f"{uuid.uuid4()}.webp"
-                azure_url = media_service.upload_bytes(webp_bytes, new_filename, content_type="image/webp")
+                if "blob.core.windows.net" in img_url:
+                    continue
 
-                return f"![{alt_text}]({azure_url})"
-            except Exception:
-                return match.group(0)
+                try:
+                    res = await client.get(img_url, headers={"User-Agent": "Mozilla/5.0"})
+                    if res.status_code == 200:
+                        webp_bytes = media_service.convert_to_webp(res.content)
+                        filename = f"md_{uuid.uuid4()}.webp"
+                        azure_url = media_service.upload_bytes(
+                            webp_bytes, 
+                            filename, 
+                            content_type="image/webp"
+                        )
+                        
+                        old_tag = match.group(0)
+                        new_tag = f"![{alt_text}]({azure_url})"
+                        text = text.replace(old_tag, new_tag)
+                except Exception as e:
+                    continue
 
-        processed_content = self.img_pattern.sub(replace_match, markdown_text)
-        return media_service.upload_bytes(
-            processed_content.encode("utf-8"),
-            filename,
-            content_type="text/markdown"
-        )
+        return text
 
-    def read_markdown(self, filename: str) -> str:
-        return media_service.read_text_blob(filename)
-
-    # useless for prod method
-    def create_markdown_from_text(self, text_content: str) -> dict:
-        filename = f"test_{uuid.uuid4()}.md"
-        url = self.process_and_upload(text_content, filename)
-        return {
-            "url": url,
-            "filename": filename,
-            "original_text": text_content
-        }
 
 markdown_service = MarkdownService()

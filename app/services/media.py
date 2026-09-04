@@ -1,6 +1,6 @@
 import io
 from PIL import Image
-from azure.storage.blob import BlobServiceClient
+from azure.storage.blob import BlobServiceClient, ContentSettings
 from app.core.config import settings
 
 class MediaService:
@@ -22,13 +22,12 @@ class MediaService:
     def upload_bytes(self, file_bytes: bytes, filename: str, content_type: str = "image/webp") -> str:
         blob_service_client = BlobServiceClient.from_connection_string(self.connection_string)
         blob_client = blob_service_client.get_blob_client(container=self.container_name, blob=filename)
-        blob_client.upload_blob(file_bytes, overwrite=True, content_type=content_type)
+        
+        blob_client.upload_blob(
+            file_bytes, 
+            overwrite=True, 
+            content_settings=ContentSettings(content_type=content_type)
+        )
         return blob_client.url
-
-    def read_text_blob(self, blob_name: str, container: str = "media") -> str:
-        blob_service_client = BlobServiceClient.from_connection_string(self.connection_string)
-        blob_client = blob_service_client.get_blob_client(container=container, blob=blob_name)
-        blob_data = blob_client.download_blob()
-        return blob_data.readall().decode("utf-8")
 
 media_service = MediaService()

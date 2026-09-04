@@ -1,6 +1,5 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from app.services.media import media_service
-from app.services.markdown import markdown_service
 import uuid
 
 router = APIRouter(prefix="/media", tags=["media"])
@@ -19,26 +18,3 @@ async def upload_image(file: UploadFile = File(...)):
         return {"url": url, "filename": filename}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"upload failed: {str(e)}")
-
-@router.post("/upload-markdown")
-async def upload_markdown(file: UploadFile = File(...)):
-    if not file.filename.endswith(".md"):
-        raise HTTPException(status_code=400, detail="not a markdown file")
-
-    try:
-        content_bytes = await file.read()
-        content_str = content_bytes.decode("utf-8")
-
-        filename = f"{uuid.uuid4()}.md"
-        url = markdown_service.process_and_upload(content_str, filename)
-
-        return {"url": url, "filename": filename}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"markdown upload failed: {str(e)}")
-
-@router.post("/test-create-markdown")
-async def test_create_markdown(text: str):
-    try:
-        return markdown_service.create_markdown_from_text(text)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"test creation failed: {str(e)}")

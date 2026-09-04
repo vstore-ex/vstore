@@ -6,8 +6,10 @@ from app.core.db import get_db
 from app.models import Game, Genre, Tag, User
 from app.schemas import GameCreate, GameUpdate, GameOut, GameListOut
 from app.api.auth.authorization import get_current_user, require_admin
+from app.services.markdown import markdown_service
 
 router = APIRouter(prefix="/games", tags=["games"])
+
 
 # public
 
@@ -32,6 +34,7 @@ async def list_games(
 
     return query.offset(skip).limit(limit).all()
 
+
 @router.get("/{game_id}", response_model=GameOut)
 async def get_game(game_id: int, db: Session = Depends(get_db)):
     game = db.query(Game).options(
@@ -46,6 +49,7 @@ async def get_game(game_id: int, db: Session = Depends(get_db)):
 
     return game
 
+
 # admin
 
 @router.post("/", response_model=GameOut, status_code=status.HTTP_201_CREATED)
@@ -55,6 +59,12 @@ async def create_game(
     admin: User = Depends(require_admin)
 ):
     game_data = game_in.model_dump(exclude={"genre_ids", "tag_ids"})
+    
+    game_data["description_md"] = await markdown_service.process_content(
+        game_in.description_md, 
+        allow_images=True
+    )
+    
     game = Game(**game_data)
 
     if game_in.genre_ids:
@@ -68,6 +78,7 @@ async def create_game(
 
     return game
 
+
 @router.put("/{game_id}", response_model=GameOut)
 async def update_game(
     game_id: int,
@@ -80,6 +91,12 @@ async def update_game(
         raise HTTPException(status_code=404, detail="game not found")
 
     update_data = game_in.model_dump(exclude_unset=True)
+
+    if "description_md" in update_data and update_data["description_md"] is not None:
+        update_data["description_md"] = await markdown_service.process_content(
+            update_data["description_md"], 
+            allow_images=True
+        )
 
     if "genre_ids" in update_data:
         genre_ids = update_data.pop("genre_ids")
@@ -98,6 +115,7 @@ async def update_game(
     db.refresh(game)
 
     return game
+
 
 @router.delete("/{game_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_game(

@@ -2,10 +2,11 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
-from app.models import User
+from app.models import User, Game, GameReview
 from app.services.search import search_service
 
 router = APIRouter(prefix="/search", tags=["search"])
+
 
 @router.get("/users")
 async def search_users(q: str = Query("", description="search term"), db: Session = Depends(get_db)):
@@ -26,9 +27,24 @@ async def search_users(q: str = Query("", description="search term"), db: Sessio
         for u in users
     ]
 
-@router.get("/markdown")
-async def search_markdown(
-    q: str = Query(..., description="query string to search across all stored markdown files"),
-    container: str = "media"
-):
-    return search_service.search_all_markdowns(query=q, container=container)
+
+@router.get("/games")
+async def search_games(q: str = Query("", description="search by title, description, developer or publisher"), db: Session = Depends(get_db)):
+    games = search_service.search_model(
+        db=db,
+        model=Game,
+        search_fields=[Game.title, Game.description_md, Game.developer, Game.publisher],
+        query=q
+    )
+    return games
+
+
+@router.get("/reviews")
+async def search_reviews(q: str = Query("", description="search inside review text"), db: Session = Depends(get_db)):
+    reviews = search_service.search_model(
+        db=db,
+        model=GameReview,
+        search_fields=[GameReview.content_md],
+        query=q
+    )
+    return reviews
