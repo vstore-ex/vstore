@@ -22,12 +22,21 @@ class MediaService:
     def upload_bytes(self, file_bytes: bytes, filename: str, content_type: str = "image/webp") -> str:
         blob_service_client = BlobServiceClient.from_connection_string(self.connection_string)
         blob_client = blob_service_client.get_blob_client(container=self.container_name, blob=filename)
-        
+
         blob_client.upload_blob(
-            file_bytes, 
-            overwrite=True, 
+            file_bytes,
+            overwrite=True,
             content_settings=ContentSettings(content_type=content_type)
         )
         return blob_client.url
+
+    def delete_blob(self, filename: str) -> bool:
+        try:
+            blob_service_client = BlobServiceClient.from_connection_string(self.connection_string)
+            blob_client = blob_service_client.get_blob_client(container=self.container_name, blob=filename)
+            blob_client.delete_blob()
+            return True
+        except Exception:
+            return False
 
 media_service = MediaService()
