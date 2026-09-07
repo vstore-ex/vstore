@@ -1,9 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+
 from app.core.db import get_db
 from app.core.security import verify_password, create_access_token
-from app.models.base import User
+from app.models import User
 from app.schemas import Token
 
 router = APIRouter()
@@ -25,23 +26,20 @@ async def login(
     if user.is_banned:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="this account has been banned"
+            detail="account banned"
         )
 
     access_token = create_access_token(data={"sub": user.username})
-
     response.set_cookie(
         key="access_token",
         value=access_token,
         httponly=True,
         samesite="lax",
-        # secure=True,
     )
 
-    return {"message": "successfully logged in"}
+    return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/logout")
 async def logout(response: Response):
-    # remove cookie
     response.delete_cookie("access_token")
     return {"message": "logged out"}

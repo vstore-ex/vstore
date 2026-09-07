@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+
 from app.core.db import get_db
 from app.core.security import get_password_hash
-from app.models.base import User, Role
+from app.models import User, Role
 from app.schemas import UserCreate, UserOut
 
 router = APIRouter()
@@ -15,18 +16,15 @@ async def register(user_in: UserCreate, db: Session = Depends(get_db)):
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="username or email already registered"
+            detail="user already exists"
         )
 
-    # get default role
-    role = db.query(Role).filter(Role.name == "User").first()
+    role = db.query(Role).filter(Role.name == "user").first()
     if not role:
-        role = db.query(Role).first()
-        if not role:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="no roles found in database"
-            )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="user role not found"
+        )
 
     new_user = User(
         username=user_in.username,
