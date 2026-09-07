@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional, List, Union
 from datetime import datetime
 from app.models.game import MediaType, BannerType
 
@@ -15,10 +15,16 @@ class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     phone: Optional[str] = None
     email: Optional[str] = None
+    avatar: Optional[str] = None
 
 class UserLogin(BaseModel):
     username: str
     password: str
+
+class UserStats(BaseModel):
+    games: int = 0
+    achievements: int = 0
+    wishlist: int = 0
 
 class UserOut(BaseModel):
     id: int
@@ -26,7 +32,11 @@ class UserOut(BaseModel):
     email: str
     full_name: Optional[str] = None
     phone: Optional[str] = None
+    avatar: Optional[str] = None
+    is_banned: bool
+    created_at: datetime
     role_name: str
+    stats: UserStats = UserStats()
 
     class Config:
         from_attributes = True
@@ -228,3 +238,50 @@ class CommentThreadOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+# achievement schemas
+class AchievementCreate(BaseModel):
+    id: Optional[str] = None
+    title: str
+    description: str
+    icon: str
+    completion_percent: float = 0.0
+
+class AchievementUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    icon: Optional[str] = None
+    completion_percent: Optional[float] = None
+
+class AchievementOut(BaseModel):
+    id: str
+    product_id: Union[int, str]
+    title: str
+    description: str
+    icon: str
+    completion_percent: float
+    unlocked: Optional[bool] = None
+    unlocked_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+
+class AchievementPaginatedResponse(BaseModel):
+    items: List[AchievementOut]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
+    user_completion_percent: Optional[float] = None
+
+# wishlist schemas
+class WishlistItemOut(BaseModel):
+    product: GameOut
+    added_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class WishlistResponse(BaseModel):
+    items: List[WishlistItemOut]

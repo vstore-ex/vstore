@@ -8,7 +8,10 @@ from app.api.taxonomy import router as taxonomy_router
 from app.api.artworks import router as artworks_router
 from app.api.community import router as community_router
 from app.api.users import router as users_router
+from app.api.achievements import router as achievements_router
+from app.api.wishlists import router as wishlists_router
 from app.admin import setup_admin
+
 
 from app.models import Base, User, Role
 from app.core.config import settings
@@ -53,7 +56,10 @@ app.include_router(taxonomy_router, prefix="/api/v1")
 app.include_router(artworks_router, prefix="/api/v1")
 app.include_router(community_router, prefix="/api/v1")
 app.include_router(users_router, prefix="/api/v1")
+app.include_router(achievements_router, prefix="/api/v1")
+app.include_router(wishlists_router, prefix="/api/v1")
 app.include_router(media_router, prefix="/api/v1")
+
 app.include_router(search_router, prefix="/api/v1")
 
 

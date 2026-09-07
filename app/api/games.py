@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.db import get_db
-from app.models import Game, Genre, Tag, User
+from app.models import Game, Tag, User
 from app.schemas import GameCreate, GameUpdate, GameOut, GameListOut
 from app.api.auth.authorization import get_current_user, require_admin
 from app.services.markdown import markdown_service
@@ -33,7 +33,6 @@ async def list_games(
 @router.get("/{game_id}", response_model=GameOut)
 async def get_game(game_id: int, db: Session = Depends(get_db)):
     game = db.query(Game).options(
-        joinedload(Game.genres),
         joinedload(Game.tags),
         joinedload(Game.banners),
         joinedload(Game.media)
@@ -53,7 +52,7 @@ async def create_game(
     db: Session = Depends(get_db),
     admin: User = Depends(require_admin)
 ):
-    game_data = game_in.model_dump(exclude={"genre_ids", "tag_ids"})
+    game_data = game_in.model_dump(exclude={"tag_ids"})
     
     game_data["description_md"] = await markdown_service.process_content(
         game_in.description_md, 
@@ -92,15 +91,11 @@ async def update_game(
             allow_images=True
         )
 
-    if "genre_ids" in update_data:
-        genre_ids = update_data.pop("genre_ids")
-        if genre_ids is not None:
-            game.genres = db.query(Genre).filter(Genre.id.in_(genre_ids)).all()
-
     if "tag_ids" in update_data:
         tag_ids = update_data.pop("tag_ids")
         if tag_ids is not None:
             game.tags = db.query(Tag).filter(Tag.id.in_(tag_ids)).all()
+
 
     for field, value in update_data.items():
         setattr(game, field, value)

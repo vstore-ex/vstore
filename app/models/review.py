@@ -14,14 +14,14 @@ class GameReview(Base):
     __table_args__ = (UniqueConstraint("game_id", "user_id", name="uq_user_game_review"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    game_id: Mapped[int] = mapped_column(Integer, ForeignKey("games.id"), nullable=False)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
-    thread_id: Mapped[int] = mapped_column(Integer, ForeignKey("comment_threads.id"), nullable=False, unique=True)
-    
+    game_id: Mapped[int] = mapped_column(Integer, ForeignKey("games.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    thread_id: Mapped[int] = mapped_column(Integer, ForeignKey("comment_threads.id", ondelete="CASCADE"), nullable=False, unique=True)
+
     is_positive: Mapped[bool] = mapped_column(Boolean, nullable=False)
     content_md: Mapped[str] = mapped_column(Text, nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
-    updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
+    updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=True)
 
     game: Mapped["Game"] = relationship("Game", back_populates="reviews")
     user: Mapped["User"] = relationship("User")
@@ -33,8 +33,8 @@ class ReviewReaction(Base):
     __table_args__ = (UniqueConstraint("review_id", "user_id", "reaction_type", name="uq_user_review_reaction"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    review_id: Mapped[int] = mapped_column(Integer, ForeignKey("game_reviews.id"), nullable=False)
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    review_id: Mapped[int] = mapped_column(Integer, ForeignKey("game_reviews.id", ondelete="CASCADE"), nullable=False, index=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     reaction_type: Mapped[ReactionType] = mapped_column(Enum(ReactionType), nullable=False)
 
     review: Mapped["GameReview"] = relationship("GameReview", back_populates="reactions")

@@ -10,7 +10,6 @@ game_tags = Table(
     Column("tag_id", Integer, ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True),
 )
 
-# game tag set by admin
 class Tag(Base):
     __tablename__ = "tags"
 

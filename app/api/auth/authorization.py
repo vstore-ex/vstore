@@ -45,7 +45,35 @@ async def get_current_user(
 
     return user
 
+async def get_optional_current_user(
+    request: Request,
+    db: Session = Depends(get_db)
+) -> Optional[User]:
+    token = request.headers.get("Authorization")
+    if token and token.startswith("Bearer "):
+        token = token.split(" ")[1]
+    elif not (token := request.cookies.get("access_token")):
+        token = None
+
+    if not token:
+        return None
+
+    payload = decode_access_token(token)
+    if payload is None:
+        return None
+
+    username: str = payload.get("sub")
+    if not username:
+        return None
+
+    user = db.query(User).filter(User.username == username).first()
+    if user is None or user.is_banned:
+        return None
+
+    return user
+
 async def get_current_active_user(
+
     current_user: User = Depends(get_current_user)
 ) -> User:
     return current_user
