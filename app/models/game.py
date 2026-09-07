@@ -47,6 +47,7 @@ class Game(Base):
     artworks: Mapped[list["Artwork"]] = relationship("Artwork", back_populates="game")
     achievements: Mapped[list["Achievement"]] = relationship("Achievement", back_populates="game", cascade="all, delete-orphan")
     wishlist_entries: Mapped[list["UserWishlist"]] = relationship("UserWishlist", back_populates="product", cascade="all, delete-orphan")
+    cart_entries: Mapped[list["UserCart"]] = relationship("UserCart", back_populates="product", cascade="all, delete-orphan")
 
 class GameBanner(Base):
     __tablename__ = "game_banners"

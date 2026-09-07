@@ -35,3 +35,5 @@ class User(Base):
     role: Mapped["Role"] = relationship("Role", back_populates="users")
     unlocked_achievements: Mapped[list["UserAchievement"]] = relationship("UserAchievement", back_populates="user", cascade="all, delete-orphan")
     wishlist_items: Mapped[list["UserWishlist"]] = relationship("UserWishlist", back_populates="user", cascade="all, delete-orphan")
+    cart_items: Mapped[list["UserCart"]] = relationship("UserCart", back_populates="user", cascade="all, delete-orphan")
+    orders: Mapped[list["Order"]] = relationship("Order", back_populates="user", cascade="all, delete-orphan")

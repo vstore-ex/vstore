@@ -8,6 +8,8 @@ from app.models.artwork import Artwork
 from app.models.comment import CommentThread, Comment
 from app.models.achievement import Achievement, UserAchievement
 from app.models.wishlist import UserWishlist
+from app.models.cart import UserCart
+from app.models.order import Order, OrderItem
 
 __all__ = [
     "Base",
@@ -30,4 +32,7 @@ __all__ = [
     "Achievement",
     "UserAchievement",
     "UserWishlist",
+    "UserCart",
+    "Order",
+    "OrderItem",
 ]

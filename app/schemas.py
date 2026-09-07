@@ -164,6 +164,50 @@ class ReviewOut(BaseModel):
     class Config:
         from_attributes = True
 
+class ReviewVoteRequest(BaseModel):
+    reaction_type: str
+
+# cart schemas
+class CartItemOut(BaseModel):
+    product_id: int
+    title: str
+    price: float
+    added_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class CartResponse(BaseModel):
+    items: List[CartItemOut]
+    subtotal: float
+    tax: float
+    total: float
+    currency: str = "UAH"
+
+# order schemas
+class OrderCreate(BaseModel):
+    payment_method: str
+    terms_accepted: bool
+
+class OrderItemOut(BaseModel):
+    product_id: int
+    price_at_purchase: float
+
+    class Config:
+        from_attributes = True
+
+class OrderOut(BaseModel):
+    id: int
+    status: str
+    subtotal: float
+    tax: float
+    total: float
+    created_at: datetime
+    items: List[OrderItemOut]
+
+    class Config:
+        from_attributes = True
+
 # artwork schemas
 class ArtworkCreate(BaseModel):
     game_id: int

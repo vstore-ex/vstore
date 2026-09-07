@@ -4,15 +4,16 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.db import get_db
-from app.models import Game, GameReview, CommentThread, User
-from app.schemas import ReviewCreate, ReviewUpdate, ReviewOut
+from app.models import Game, GameReview, CommentThread, User, ReviewReaction, ReactionType
+from app.schemas import ReviewCreate, ReviewUpdate, ReviewOut, ReviewVoteRequest
 from app.api.auth.authorization import get_current_user
 from app.services.markdown import markdown_service
 
-router = APIRouter(prefix="/games/{game_id}/reviews", tags=["reviews"])
+router = APIRouter(tags=["reviews"])
 
+# game scoped
 
-@router.get("/", response_model=List[ReviewOut])
+@router.get("/games/{game_id}/reviews", response_model=List[ReviewOut])
 async def list_reviews(
     game_id: int,
     skip: int = Query(0, ge=0),
@@ -39,8 +40,7 @@ async def list_reviews(
         result.append(ReviewOut(**data))
     return result
 
-
-@router.post("/", response_model=ReviewOut, status_code=status.HTTP_201_CREATED)
+@router.post("/games/{game_id}/reviews", response_model=ReviewOut, status_code=status.HTTP_201_CREATED)
 async def create_review(
     game_id: int,
     review_in: ReviewCreate,
@@ -79,18 +79,17 @@ async def create_review(
     data["username"] = current_user.username
     return ReviewOut(**data)
 
+# global review endpoints
 
-@router.put("/{review_id}", response_model=ReviewOut)
+@router.patch("/reviews/{review_id}", response_model=ReviewOut)
 async def update_review(
-    game_id: int,
     review_id: int,
     review_in: ReviewUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
     review = db.query(GameReview).options(joinedload(GameReview.user)).filter(
-        GameReview.id == review_id,
-        GameReview.game_id == game_id
+        GameReview.id == review_id
     ).first()
 
     if not review:
@@ -113,18 +112,13 @@ async def update_review(
     data["username"] = review.user.username
     return ReviewOut(**data)
 
-
-@router.delete("/{review_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/reviews/{review_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_review(
-    game_id: int,
     review_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    review = db.query(GameReview).filter(
-        GameReview.id == review_id,
-        GameReview.game_id == game_id
-    ).first()
+    review = db.query(GameReview).filter(GameReview.id == review_id).first()
 
     if not review:
         raise HTTPException(status_code=404, detail="review not found")
@@ -135,3 +129,39 @@ async def delete_review(
     db.delete(review)
     db.commit()
     return None
+
+@router.post("/reviews/{review_id}/vote", status_code=status.HTTP_201_CREATED)
+async def vote_review(
+    review_id: int,
+    vote_in: ReviewVoteRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    review = db.query(GameReview).filter(GameReview.id == review_id).first()
+    if not review:
+        raise HTTPException(status_code=404, detail="review not found")
+
+    # check if user already voted on this review with this type
+    existing_vote = db.query(ReviewReaction).filter(
+        ReviewReaction.review_id == review_id,
+        ReviewReaction.user_id == current_user.id,
+        ReviewReaction.reaction_type == vote_in.reaction_type
+    ).first()
+
+    if existing_vote:
+        # toggle vote. remove if exists
+        db.delete(existing_vote)
+        db.commit()
+        return {"message": "vote removed"}
+
+    # create new vote
+    vote = ReviewReaction(
+        review_id=review_id,
+        user_id=current_user.id,
+        reaction_type=vote_in.reaction_type
+    )
+    db.add(vote)
+    db.commit()
+    db.refresh(vote)
+
+    return {"message": "vote added", "reaction": vote.reaction_type}
