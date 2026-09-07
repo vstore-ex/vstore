@@ -1,6 +1,7 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session, joinedload
+from decimal import Decimal
 
 from app.core.db import get_db
 from app.models import User, Game, UserCart
@@ -9,7 +10,7 @@ from app.api.auth.authorization import get_current_user
 
 router = APIRouter(tags=["cart"])
 
-TAX_RATE = 0.05  # 5% example
+TAX_RATE = Decimal("0.05")  # 5% tax
 
 @router.get("/me/cart", response_model=CartResponse)
 async def get_my_cart(
@@ -20,10 +21,10 @@ async def get_my_cart(
         joinedload(UserCart.product)
     ).filter(UserCart.user_id == current_user.id).all()
 
-    subtotal = 0.0
+    subtotal = Decimal("0.00")
     cart_items = []
     for item in items:
-        price = float(item.product.price) if item.product else 0.0
+        price = Decimal(str(item.product.price)) if item.product else Decimal("0.00")
         subtotal += price
         cart_items.append({
             "product_id": item.product.id if item.product else None,
@@ -37,9 +38,9 @@ async def get_my_cart(
 
     return CartResponse(
         items=cart_items,
-        subtotal=round(subtotal, 2),
-        tax=round(tax, 2),
-        total=round(total, 2),
+        subtotal=subtotal.quantize(Decimal("0.01")),
+        tax=tax.quantize(Decimal("0.01")),
+        total=total.quantize(Decimal("0.01")),
         currency="UAH"
     )
 
@@ -53,7 +54,6 @@ async def add_to_cart(
     if not product:
         raise HTTPException(status_code=404, detail="product not found")
 
-    # check if already in cart
     existing = db.query(UserCart).filter(
         UserCart.user_id == current_user.id,
         UserCart.product_id == product_id
@@ -66,6 +66,7 @@ async def add_to_cart(
     db.add(cart_item)
     db.commit()
     db.refresh(cart_item)
+
     return {"message": "product added to cart"}
 
 @router.delete("/me/cart/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -84,6 +85,7 @@ async def remove_from_cart(
 
     db.delete(item)
     db.commit()
+
     return None
 
 @router.delete("/me/cart", status_code=status.HTTP_204_NO_CONTENT)
@@ -93,4 +95,5 @@ async def clear_cart(
 ):
     db.query(UserCart).filter(UserCart.user_id == current_user.id).delete()
     db.commit()
+
     return None

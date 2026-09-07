@@ -1,6 +1,8 @@
 from typing import List
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from decimal import Decimal
+
 from app.core.db import get_db
 from app.models import User, Order, OrderItem, UserCart, Game
 from app.schemas import OrderCreate, OrderOut, OrderItemOut
@@ -8,7 +10,7 @@ from app.api.auth.authorization import get_current_user
 
 router = APIRouter(prefix="/me/orders", tags=["orders"])
 
-TAX_RATE = 0.05
+TAX_RATE = Decimal("0.05")
 
 @router.post("/", response_model=OrderOut, status_code=status.HTTP_201_CREATED)
 async def create_order(
@@ -21,11 +23,11 @@ async def create_order(
     if not cart_items:
         raise HTTPException(status_code=400, detail="cart is empty")
 
-    #2 calculate totals with explicit float conversion
-    subtotal = 0.0
+    #2 calculate totals
+    subtotal = Decimal("0.00")
     for item in cart_items:
         if item.product:
-            subtotal += float(item.product.price)
+            subtotal += Decimal(str(item.product.price))
 
     tax = subtotal * TAX_RATE
     total = subtotal + tax
@@ -36,9 +38,9 @@ async def create_order(
             user_id=current_user.id,
             status="paid",
             payment_method=order_in.payment_method,
-            subtotal=round(subtotal, 2),
-            tax=round(tax, 2),
-            total=round(total, 2)
+            subtotal=subtotal.quantize(Decimal("0.01")),
+            tax=tax.quantize(Decimal("0.01")),
+            total=total.quantize(Decimal("0.01"))
         )
         db.add(order)
         db.flush()
@@ -49,10 +51,11 @@ async def create_order(
                 order_item = OrderItem(
                     order_id=order.id,
                     product_id=item.product_id,
-                    price_at_purchase=float(item.product.price)
+                    price_at_purchase=Decimal(str(item.product.price))
                 )
                 db.add(order_item)
 
+        #5 clear cart
         db.query(UserCart).filter(UserCart.user_id == current_user.id).delete()
 
         db.commit()
@@ -63,16 +66,16 @@ async def create_order(
 
     # construct response
     items_out = [
-        OrderItemOut(product_id=oi.product_id, price_at_purchase=float(oi.price_at_purchase))
+        OrderItemOut(product_id=oi.product_id, price_at_purchase=oi.price_at_purchase)
         for oi in order.items
     ]
 
     return OrderOut(
         id=order.id,
         status=order.status,
-        subtotal=float(order.subtotal),
-        tax=float(order.tax),
-        total=float(order.total),
+        subtotal=order.subtotal,
+        tax=order.tax,
+        total=order.total,
         created_at=order.created_at,
         items=items_out
     )
@@ -87,15 +90,15 @@ async def list_my_orders(
     result = []
     for o in orders:
         items_out = [
-            OrderItemOut(product_id=oi.product_id, price_at_purchase=float(oi.price_at_purchase))
+            OrderItemOut(product_id=oi.product_id, price_at_purchase=oi.price_at_purchase)
             for oi in o.items
         ]
         result.append(OrderOut(
             id=o.id,
             status=o.status,
-            subtotal=float(o.subtotal),
-            tax=float(o.tax),
-            total=float(o.total),
+            subtotal=o.subtotal,
+            tax=o.tax,
+            total=o.total,
             created_at=o.created_at,
             items=items_out
         ))
@@ -112,16 +115,16 @@ async def get_my_order(
         raise HTTPException(status_code=404, detail="order not found")
 
     items_out = [
-        OrderItemOut(product_id=oi.product_id, price_at_purchase=float(oi.price_at_purchase))
+        OrderItemOut(product_id=oi.product_id, price_at_purchase=oi.price_at_purchase)
         for oi in order.items
     ]
 
     return OrderOut(
         id=order.id,
         status=order.status,
-        subtotal=float(order.subtotal),
-        tax=float(order.tax),
-        total=float(order.total),
+        subtotal=order.subtotal,
+        tax=order.tax,
+        total=order.total,
         created_at=order.created_at,
         items=items_out
     )

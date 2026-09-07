@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional, List, Union
 from datetime import datetime
+from decimal import Decimal
 from app.models.game import MediaType, BannerType
 
 # user schemas
@@ -83,8 +84,8 @@ class GameMediaOut(BaseModel):
 class GameCreate(BaseModel):
     title: str
     description_md: str
-    original_price: float = 0.0
-    price: float = 0.0
+    original_price: Decimal = Decimal("0.00")
+    price: Decimal = Decimal("0.00")
     is_free: bool = True
     developer: Optional[str] = None
     publisher: Optional[str] = None
@@ -96,8 +97,8 @@ class GameCreate(BaseModel):
 class GameUpdate(BaseModel):
     title: Optional[str] = None
     description_md: Optional[str] = None
-    original_price: Optional[float] = None
-    price: Optional[float] = None
+    original_price: Optional[Decimal] = None
+    price: Optional[Decimal] = None
     is_free: Optional[bool] = None
     developer: Optional[str] = None
     publisher: Optional[str] = None
@@ -110,8 +111,8 @@ class GameOut(BaseModel):
     id: int
     title: str
     description_md: str
-    original_price: float
-    price: float
+    original_price: Decimal
+    price: Decimal
     is_free: bool
     developer: Optional[str] = None
     publisher: Optional[str] = None
@@ -129,8 +130,8 @@ class GameOut(BaseModel):
 class GameListOut(BaseModel):
     id: int
     title: str
-    original_price: float
-    price: float
+    original_price: Decimal
+    price: Decimal
     is_free: bool
     developer: Optional[str] = None
     publisher: Optional[str] = None
@@ -171,7 +172,7 @@ class ReviewVoteRequest(BaseModel):
 class CartItemOut(BaseModel):
     product_id: int
     title: str
-    price: float
+    price: Decimal
     added_at: datetime
 
     class Config:
@@ -179,9 +180,9 @@ class CartItemOut(BaseModel):
 
 class CartResponse(BaseModel):
     items: List[CartItemOut]
-    subtotal: float
-    tax: float
-    total: float
+    subtotal: Decimal
+    tax: Decimal
+    total: Decimal
     currency: str = "UAH"
 
 # order schemas
@@ -191,7 +192,7 @@ class OrderCreate(BaseModel):
 
 class OrderItemOut(BaseModel):
     product_id: int
-    price_at_purchase: float
+    price_at_purchase: Decimal
 
     class Config:
         from_attributes = True
@@ -199,9 +200,9 @@ class OrderItemOut(BaseModel):
 class OrderOut(BaseModel):
     id: int
     status: str
-    subtotal: float
-    tax: float
-    total: float
+    subtotal: Decimal
+    tax: Decimal
+    total: Decimal
     created_at: datetime
     items: List[OrderItemOut]
 
