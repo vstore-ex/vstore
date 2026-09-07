@@ -12,6 +12,7 @@ from app.api.achievements import router as achievements_router
 from app.api.wishlists import router as wishlists_router
 from app.api.cart import router as cart_router
 from app.api.orders import router as orders_router
+from app.api.support import router as support_router
 from app.admin import setup_admin
 
 
@@ -62,6 +63,7 @@ app.include_router(achievements_router, prefix="/api/v1")
 app.include_router(wishlists_router, prefix="/api/v1")
 app.include_router(cart_router, prefix="/api/v1")
 app.include_router(orders_router, prefix="/api/v1")
+app.include_router(support_router, prefix="/api/v1")
 app.include_router(media_router, prefix="/api/v1")
 
 app.include_router(search_router, prefix="/api/v1")

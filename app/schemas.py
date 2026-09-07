@@ -208,6 +208,47 @@ class OrderOut(BaseModel):
     class Config:
         from_attributes = True
 
+# support schemas
+class SupportArticleOut(BaseModel):
+    id: int
+    title: str
+    content_md: str
+    category: Optional[str]
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class SupportArticlePaginatedResponse(BaseModel):
+    items: List[SupportArticleOut]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
+
+class SupportTicketCreate(BaseModel):
+    subject: str
+    message: str
+    priority: Optional[str] = "medium"
+
+class SupportTicketOut(BaseModel):
+    id: int
+    user_id: int
+    subject: str
+    message: str
+    status: str
+    priority: str
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class SupportTicketUpdate(BaseModel):
+    status: Optional[str] = None
+    priority: Optional[str] = None
+
 # artwork schemas
 class ArtworkCreate(BaseModel):
     game_id: int

@@ -37,3 +37,4 @@ class User(Base):
     wishlist_items: Mapped[list["UserWishlist"]] = relationship("UserWishlist", back_populates="user", cascade="all, delete-orphan")
     cart_items: Mapped[list["UserCart"]] = relationship("UserCart", back_populates="user", cascade="all, delete-orphan")
     orders: Mapped[list["Order"]] = relationship("Order", back_populates="user", cascade="all, delete-orphan")
+    support_tickets: Mapped[list["SupportTicket"]] = relationship("SupportTicket", back_populates="user", cascade="all, delete-orphan")

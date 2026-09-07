@@ -10,6 +10,7 @@ from app.models.achievement import Achievement, UserAchievement
 from app.models.wishlist import UserWishlist
 from app.models.cart import UserCart
 from app.models.order import Order, OrderItem
+from app.models.support import SupportArticle, SupportTicket
 
 __all__ = [
     "Base",
@@ -35,4 +36,6 @@ __all__ = [
     "UserCart",
     "Order",
     "OrderItem",
+    "SupportArticle",
+    "SupportTicket",
 ]
