@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
-
 from app.core.db import get_db
 from app.api.auth.authorization import require_admin
 from app.models import DiscoverLayout, Game
@@ -14,7 +13,7 @@ from app.schemas import (
     GameListOut
 )
 
-router = APIRouter()
+router = APIRouter(prefix="/discover", tags=["discover"])
 
 @router.get("/discover", response_model=DiscoverLayoutOut)
 async def get_discover_page(db: Session = Depends(get_db)):
