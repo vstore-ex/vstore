@@ -371,3 +371,42 @@ class WishlistItemOut(BaseModel):
 
 class WishlistResponse(BaseModel):
     items: List[WishlistItemOut]
+
+# discover schemas
+class DiscoverSectionOut(BaseModel):
+    id: str
+    title: str
+    games: List[GameListOut]
+
+class DiscoverPromoOut(BaseModel):
+    id: str
+    title: str
+    image_url: str
+    link: str
+
+class DiscoverRankedColumnOut(BaseModel):
+    title: str
+    games: List[GameListOut]
+
+class DiscoverLayoutOut(BaseModel):
+    featured: Optional[GameListOut] = None
+    sections: List[DiscoverSectionOut] = []
+    promos: List[DiscoverPromoOut] = []
+    deals: List[GameListOut] = []
+    free_games: List[GameListOut] = []
+    ranked_columns: List[DiscoverRankedColumnOut] = []
+    mobile_banner: Optional[dict] = None
+
+class DiscoverSectionUpdate(BaseModel):
+    id: str
+    title: str
+    game_ids: List[int]
+
+class DiscoverLayoutUpdate(BaseModel):
+    featured_game_id: Optional[int] = None
+    sections: Optional[List[DiscoverSectionUpdate]] = None
+    promos: Optional[List[dict]] = None
+    deals_game_ids: Optional[List[int]] = None
+    free_games_game_ids: Optional[List[int]] = None
+    ranked_columns: Optional[List[dict]] = None
+    mobile_banner: Optional[dict] = None
