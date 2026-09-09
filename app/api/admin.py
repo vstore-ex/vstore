@@ -16,7 +16,9 @@ from app.schemas import (
     TagCreate, TagOut,
     GameCreate, GameOut, GameAdminUpdate,
     AchievementCreate, AchievementOut,
-    UserUpdate, UserOut
+    GameBannerOut, GameMediaOut,
+    UserUpdate, UserAdminUpdate, UserOut,
+    DiscoverLayoutUpdate
 )
 from app.services.media import media_service
 
@@ -331,8 +333,7 @@ async def update_order_status(
 @router.patch("/users/{user_id}", response_model=UserOut)
 async def update_user_admin(
     user_id: int,
-    update_data: UserUpdate,
-    role_id: Optional[int] = Form(None),
+    user_in: UserAdminUpdate,
     db: Session = Depends(get_db),
     _admin=Depends(require_admin)
 ):
@@ -340,12 +341,12 @@ async def update_user_admin(
     if not user:
         raise HTTPException(status_code=404, detail="user not found")
 
-    # update profile fields
-    data = update_data.model_dump(exclude_unset=True)
-    for key, value in data.items():
+    update_data = user_in.model_dump(exclude_unset=True)
+    role_id = update_data.pop("role_id", None)
+
+    for key, value in update_data.items():
         setattr(user, key, value)
 
-    # update role if provided
     if role_id is not None:
         role = db.query(Role).filter(Role.id == role_id).first()
         if not role:
@@ -355,7 +356,6 @@ async def update_user_admin(
     db.commit()
     db.refresh(user)
 
-    # return UserOut (needs stats)
     from app.api.users import get_user_stats, build_user_out
     stats = get_user_stats(db, user.id)
     return build_user_out(user, stats)

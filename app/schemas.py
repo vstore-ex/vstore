@@ -18,6 +18,9 @@ class UserUpdate(BaseModel):
     email: Optional[str] = None
     avatar: Optional[str] = None
 
+class UserAdminUpdate(UserUpdate):
+    role_id: Optional[int] = None
+
 class UserLogin(BaseModel):
     username: str
     password: str

@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from app.api.endpoints import router as api_router
+from app.api.auth.authentication import router as auth_router
 from app.api.media import router as media_router
 from app.api.search import router as search_router
 from app.api.games import router as games_router
@@ -17,8 +18,6 @@ from app.api.discover import router as discover_router
 from app.api.admin import router as admin_router
 from app.api.stats import router as stats_router
 from app.admin import setup_admin
-
-
 
 from app.models import Base, User, Role
 from app.core.config import settings
@@ -57,6 +56,7 @@ Base.metadata.create_all(bind=engine)
 
 # api routes
 app.include_router(api_router, prefix="/api/v1")
+app.include_router(auth_router, prefix="/api/v1")
 app.include_router(games_router, prefix="/api/v1")
 app.include_router(reviews_router, prefix="/api/v1")
 app.include_router(taxonomy_router, prefix="/api/v1")
