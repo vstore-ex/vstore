@@ -107,6 +107,9 @@ class GameUpdate(BaseModel):
     meta_info: Optional[str] = None
     tag_ids: Optional[List[int]] = None
 
+class GameAdminUpdate(GameUpdate):
+    is_active: Optional[bool] = None
+
 class GameOut(BaseModel):
     id: int
     title: str

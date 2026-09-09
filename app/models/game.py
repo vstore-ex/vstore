@@ -36,6 +36,7 @@ class Game(Base):
     rating: Mapped[Optional[str]] = mapped_column(String(20), nullable=True)
     requirements: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     meta_info: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
 
