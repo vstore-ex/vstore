@@ -20,6 +20,7 @@ class GameReview(Base):
 
     is_positive: Mapped[bool] = mapped_column(Boolean, nullable=False)
     content_md: Mapped[str] = mapped_column(Text, nullable=False)
+    is_hidden: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), nullable=False)
     updated_at: Mapped[Optional[datetime]] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now(), nullable=True)
 

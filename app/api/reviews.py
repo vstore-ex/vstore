@@ -27,7 +27,7 @@ async def list_reviews(
     reviews = (
         db.query(GameReview)
         .options(joinedload(GameReview.user))
-        .filter(GameReview.game_id == game_id)
+        .filter(GameReview.game_id == game_id, GameReview.is_hidden == False)
         .offset(skip)
         .limit(limit)
         .all()

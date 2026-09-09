@@ -9,14 +9,19 @@ from app.models.game import Game, GameBanner, GameMedia, BannerType, MediaType
 from app.models.taxonomy import Tag
 from app.models.achievement import Achievement
 from app.models.discover import DiscoverLayout
+from app.models.review import GameReview
+from app.models.order import Order
+from app.models.user import User, Role
 from app.schemas import (
     TagCreate, TagOut,
     GameCreate, GameOut, GameAdminUpdate,
-    AchievementCreate, AchievementOut
+    AchievementCreate, AchievementOut,
+    UserUpdate, UserOut
 )
 from app.services.media import media_service
 
 router = APIRouter(prefix="/admin", tags=["admin"])
+
 
 # tags
 
@@ -268,3 +273,80 @@ async def update_discover_layout(
     db.commit()
     db.refresh(layout)
     return {"message": "updated successfully"}
+
+# moderation and management
+
+@router.patch("/reviews/{review_id}/hide", status_code=status.HTTP_200_OK)
+async def toggle_review_visibility(
+    review_id: int,
+    db: Session = Depends(get_db),
+    _admin=Depends(require_admin)
+):
+    review = db.query(GameReview).filter(GameReview.id == review_id).first()
+    if not review:
+        raise HTTPException(status_code=404, detail="review not found")
+
+    review.is_hidden = not review.is_hidden
+    db.commit()
+    return {"message": f"Review {'hidden' if review.is_hidden else 'visible'}"}
+
+@router.delete("/reviews/{review_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_review_admin(
+    review_id: int,
+    db: Session = Depends(get_db),
+    _admin=Depends(require_admin)
+):
+    review = db.query(GameReview).filter(GameReview.id == review_id).first()
+    if not review:
+        raise HTTPException(status_code=404, detail="review not found")
+
+    db.delete(review)
+    db.commit()
+    return None
+
+@router.patch("/orders/{order_id}", status_code=status.HTTP_200_OK)
+async def update_order_status(
+    order_id: int,
+    status: str = Form(...),
+    db: Session = Depends(get_db),
+    _admin=Depends(require_admin)
+):
+    order = db.query(Order).filter(Order.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="order not found")
+
+    order.status = status
+    db.commit()
+    return {"message": f"Order status updated to {status}"}
+
+@router.patch("/users/{user_id}", response_model=UserOut)
+async def update_user_admin(
+    user_id: int,
+    update_data: UserUpdate,
+    role_id: Optional[int] = Form(None),
+    db: Session = Depends(get_db),
+    _admin=Depends(require_admin)
+):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="user not found")
+
+    # update profile fields
+    data = update_data.model_dump(exclude_unset=True)
+    for key, value in data.items():
+        setattr(user, key, value)
+
+    # update role if provided
+    if role_id is not None:
+        role = db.query(Role).filter(Role.id == role_id).first()
+        if not role:
+            raise HTTPException(status_code=400, detail="invalid role id")
+        user.role_id = role.id
+
+    db.commit()
+    db.refresh(user)
+
+    # return UserOut (needs stats)
+    from app.api.users import get_user_stats, build_user_out
+    stats = get_user_stats(db, user.id)
+    return build_user_out(user, stats)
