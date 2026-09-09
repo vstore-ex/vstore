@@ -18,6 +18,9 @@ class UserUpdate(BaseModel):
     email: Optional[str] = None
     avatar: Optional[str] = None
 
+class UserAdminUpdate(UserUpdate):
+    role_id: Optional[int] = None
+
 class UserLogin(BaseModel):
     username: str
     password: str
@@ -49,6 +52,20 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     username: Optional[str] = None
 
+# stats schemas
+class StatPointOut(BaseModel):
+    label: str
+    value: int
+
+class StatValueOut(BaseModel):
+    label: str
+    value: float
+
+class TopItemOut(BaseModel):
+    id: int
+    title: str
+    count: int
+
 # tags
 class TagCreate(BaseModel):
     name: str
@@ -75,6 +92,7 @@ class GameMediaOut(BaseModel):
     id: int
     media_type: MediaType
     url: str
+    thumbnail_url: Optional[str] = None
     sort_order: int
 
     class Config:
@@ -106,6 +124,9 @@ class GameUpdate(BaseModel):
     requirements: Optional[str] = None
     meta_info: Optional[str] = None
     tag_ids: Optional[List[int]] = None
+
+class GameAdminUpdate(GameUpdate):
+    is_active: Optional[bool] = None
 
 class GameOut(BaseModel):
     id: int
