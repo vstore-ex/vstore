@@ -49,6 +49,20 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     username: Optional[str] = None
 
+# stats schemas
+class StatPointOut(BaseModel):
+    label: str
+    value: int
+
+class StatValueOut(BaseModel):
+    label: str
+    value: float
+
+class TopItemOut(BaseModel):
+    id: int
+    title: str
+    count: int
+
 # tags
 class TagCreate(BaseModel):
     name: str
