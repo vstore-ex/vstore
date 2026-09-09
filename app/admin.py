@@ -1,5 +1,5 @@
 from sqladmin import Admin, ModelView
-from app.models import Base, User, Role, Achievement, UserAchievement
+from app.models import Base, User, Role, Achievement, UserAchievement, DiscoverLayout
 from app.core.db import engine
 
 def setup_admin(app):
@@ -9,6 +9,7 @@ def setup_admin(app):
     admin.add_view(RoleView)
     admin.add_view(AchievementView)
     admin.add_view(UserAchievementView)
+    admin.add_view(DiscoverLayoutView)
 
     return admin
 
@@ -35,3 +36,7 @@ class UserAchievementView(ModelView, model=UserAchievement):
     column_searchable_list = [UserAchievement.achievement_id]
     column_sortable_list = [UserAchievement.id, UserAchievement.user_id, UserAchievement.unlocked_at]
     form_columns = [UserAchievement.user_id, UserAchievement.achievement_id]
+
+class DiscoverLayoutView(ModelView, model=DiscoverLayout):
+    column_list = [DiscoverLayout.id, DiscoverLayout.featured_game_id]
+    form_columns = [DiscoverLayout.featured_game_id, DiscoverLayout.sections, DiscoverLayout.promos, DiscoverLayout.deals_game_ids, DiscoverLayout.free_games_game_ids, DiscoverLayout.ranked_columns, DiscoverLayout.mobile_banner]

@@ -11,6 +11,7 @@ from app.models.wishlist import UserWishlist
 from app.models.cart import UserCart
 from app.models.order import Order, OrderItem
 from app.models.support import SupportArticle, SupportTicket
+from app.models.discover import DiscoverLayout
 
 __all__ = [
     "Base",
@@ -38,4 +39,5 @@ __all__ = [
     "OrderItem",
     "SupportArticle",
     "SupportTicket",
+    "DiscoverLayout",
 ]
