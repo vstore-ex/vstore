@@ -63,23 +63,3 @@ async def get_discover_page(db: Session = Depends(get_db)):
         ],
         mobile_banner=layout.mobile_banner
     )
-
-@router.patch("/admin/discover")
-async def update_discover_layout(
-    update_data: DiscoverLayoutUpdate,
-    db: Session = Depends(get_db),
-    _admin=Depends(require_admin)
-):
-    layout = db.query(DiscoverLayout).filter(DiscoverLayout.id == 1).first()
-
-    if not layout:
-        layout = DiscoverLayout(id=1)
-        db.add(layout)
-
-    update_dict = update_data.model_dump(exclude_unset=True)
-    for key, value in update_dict.items():
-        setattr(layout, key, value)
-
-    db.commit()
-    db.refresh(layout)
-    return {"message": "Updated successfully"}
