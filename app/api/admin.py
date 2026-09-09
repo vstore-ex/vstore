@@ -199,21 +199,30 @@ async def upload_game_media(
     if not game:
         raise HTTPException(status_code=404, detail="game not found")
 
-    # for videos. TEMP
     try:
         file_bytes = await file.read()
+        thumbnail_url = None
+
         if media_type == MediaType.IMAGE:
             if not file.content_type.startswith("image/"):
                 raise HTTPException(status_code=400, detail="file must be an image")
             webp_bytes = media_service.convert_to_webp(file_bytes)
             filename = f"gallery/{game_id}_{uuid.uuid4()}.webp"
             url = media_service.upload_bytes(webp_bytes, filename)
-        else:
-            # video: upload as is. TEMP
+        elif media_type == MediaType.VIDEO:
+            # use the new process_video method
             filename = f"gallery/{game_id}_{uuid.uuid4()}_{file.filename}"
-            url = media_service.upload_bytes(file_bytes, filename, content_type=file.content_type)
+            url, thumbnail_url = media_service.process_video(file_bytes, filename)
+        else:
+            raise HTTPException(status_code=400, detail="invalid media type")
 
-        media = GameMedia(game_id=game_id, media_type=media_type, url=url, sort_order=sort_order)
+        media = GameMedia(
+            game_id=game_id,
+            media_type=media_type,
+            url=url,
+            thumbnail_url=thumbnail_url,
+            sort_order=sort_order
+        )
         db.add(media)
         db.commit()
         db.refresh(media)

@@ -68,6 +68,7 @@ class GameMedia(Base):
     game_id: Mapped[int] = mapped_column(Integer, ForeignKey("games.id", ondelete="CASCADE"), nullable=False, index=True)
     media_type: Mapped[MediaType] = mapped_column(Enum(MediaType), nullable=False)
     url: Mapped[str] = mapped_column(String(500), nullable=False)
+    thumbnail_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     sort_order: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
 
     game: Mapped["Game"] = relationship("Game", back_populates="media")

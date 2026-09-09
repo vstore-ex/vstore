@@ -75,6 +75,7 @@ class GameMediaOut(BaseModel):
     id: int
     media_type: MediaType
     url: str
+    thumbnail_url: Optional[str] = None
     sort_order: int
 
     class Config:
