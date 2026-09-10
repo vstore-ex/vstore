@@ -1,16 +1,81 @@
+# Python artifacts
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
-  
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
 .venv/
+venv/
 env/
-.env
-  
-.git
+ENV/
+env.bak/
+venv.bak/
+
+# Environment and secrets (critical leaks)
+.env*
+.secrets*
+*.pem
+*.key
+*.cert
+*.crt
+*.pfx
+
+# Local databases and locks (prevents baking local SQLite/data into image)
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Git & CI/CD
+.git/
+.github/
 .gitignore
+.gitattributes
+
+# Docker files
+Dockerfile*
+docker-compose*.yml
 .dockerignore
-  
-README.md
+
+# Tests and coverage
+tests/
+.pytest_cache/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+.hypothesis/
+
+# Linters and tool caches
+.mypy_cache/
+.ruff_cache/
+.dmypy.json
+dmypy.json
+
+# IDE and OS metadata
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Assistant metadata
+.gemini/
+.claude/
+.omg/
+.oma/
+.codex/
+
+# Temporary files and logs
 *.log
 tmp/
+temp/
+*.tmp
+
+# Documentation
+README.md
