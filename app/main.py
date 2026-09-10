@@ -29,8 +29,9 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(title=settings.PROJECT_NAME)
 
 origins = [
-    "https://vstore-admin.lemonbush-87bea63a.italynorth.azurecontainerapps.io",
-    "https://vstore-frontend.lemonbush-87bea63a.italynorth.azurecontainerapps.io",
+    "http://68.210.201.217:3000",
+    "http://68.210.201.217:3001",
+    "http://68.210.201.217:8080",
     "http://localhost:5173",
     "http://localhost:3000",
 ]
