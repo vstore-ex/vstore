@@ -1,8 +1,8 @@
-# 🎮 VStore - Game Store API
+# VStore - Game Store API
 
 A high-performance FastAPI-based backend for a modern game store. Features include a full-fledged admin panel, automated media processing, and a comprehensive store engine.
 
-## 🚀 Quick Start
+## Quick Start
 
 ### 1. Installation
 ```bash
@@ -42,7 +42,7 @@ To populate the store with games, categories, and demo users for testing:
 ./venv/bin/python scripts/seed_db.py
 ```
 
-#### 🔑 Demo Accounts
+#### Demo Accounts
 After seeding, you can use these credentials to test the API:
 - **Admin:** `admin@vstore.com` / `adminpassword`
 - **User:** `user@vstore.com` / `userpassword`
@@ -54,7 +54,7 @@ After seeding, you can use these credentials to test the API:
 
 ---
 
-## 🛠 Development
+## Development
 
 ### API Documentation
 Once the app is running, you can access the interactive documentation:
@@ -67,7 +67,7 @@ Run the test suite to ensure everything is working correctly:
 ./venv/bin/python -m pytest
 ```
 
-## 📦 Project Structure
+## Project Structure
 - `app/` - Core application logic
   - `api/` - API endpoints and routes
   - `core/` - Security, config, and database setup
