@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from sqlalchemy import text
 from app.api.endpoints import router as api_router
 from app.api.auth.authentication import router as auth_router
 from app.api.media import router as media_router
@@ -80,6 +81,16 @@ app.include_router(search_router, prefix="/api/v1")
 # admin setup
 setup_admin(app)
 
-@app.get("/")
+@app.get("/", tags=["Root"])
 async def read_root():
     return {"message": "vstore is running. go to /admin"}
+
+@app.get("/health", tags=["System"])
+async def health_check():
+    try:
+        # simple query to verify DB connection
+        with SessionLocal() as session:
+            session.execute(text("SELECT 1"))
+        return {"status": "healthy", "database": "connected"}
+    except Exception as e:
+        return {"status": "unhealthy", "database": "disconnected", "error": str(e)}, 503
